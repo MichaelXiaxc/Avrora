@@ -5,15 +5,14 @@ import os
 import xerox
 import datetime
 import time
-from time import strftime
 import requests
 from bs4 import BeautifulSoup
+import colorama
 
 home_dir = "/root/.avrora/"
 wp_path = home_dir + "avrora_waypoint.txt"
 wp_path_ = home_dir + "_avrora_waypoint.txt"
 nt_path = home_dir + "avrora_note.txt"
-#pl_url = "https://www.goal.com/en-us/%E8%8B%B1%E8%B6%85/%E7%A7%AF%E5%88%86%E6%A6%9C/2kwbbcootiqqgmrzs6o5inle5"
 pl_url = "https://www.goal.com/en/premier-league/table/2kwbbcootiqqgmrzs6o5inle5"
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
 headers={'User-Agent':user_agent}
@@ -44,13 +43,13 @@ pl_clubs_url = {
 def help_info():
     print('''
     Help Info:
-    The file should be at /usr/bin/avrora.py
+    The file should be at /usr/bin/avrora
     Be a geek
     Look into the code yourself!
     ''')
 
 def version_info():
-    print("Avrora, your personal CLI assistant, now at 0.0.1")
+    print("Avrora, your personal CLI assistant, now at 0.1.1")
 
 def function_waypoint():
     if sys.argv[2] in ('add', 'a') :
@@ -121,7 +120,7 @@ def function_time():
 def function_lookup():
     os.system("sdcv " + sys.argv[2])
 
-def function_epl_standings():
+def function_epl_standings(last_standing):
     pl = requests.get(pl_url, headers=headers, timeout=3)
     pl.encoding = 'utf-8'
     #print(pl.content)
@@ -137,24 +136,128 @@ def function_epl_standings():
     goals_diff = pl_bs.find_all("td", class_="widget-match-standings__goals-diff")
     club_points = pl_bs.find_all("td", class_="widget-match-standings__pts")
     print("-----------------------------------------------------------------------")
-    print("| " + "Pos".ljust(5) + "Clubs".ljust(30) + "Pl".ljust(4) + "W".ljust(4) + "D".ljust(4) + "L".ljust(4) + "GF".ljust(4) + "GA".ljust(4) + "GD".ljust(6) + "Pts" + "|")
+    #print("|" + colorama.Back.WHITE + colorama.Fore.BLACK + " Pos".ljust(6) + "Clubs".ljust(30) + "Pl".ljust(4) + "W".ljust(4) + "D".ljust(4) + "L".ljust(4) + "GF".ljust(4) + "GA".ljust(4) + "GD".ljust(6) + "Pts" + colorama.Fore.RESET + colorama.Back.RESET + "|")
+    print("|" + " Pos".ljust(6) + "Clubs".ljust(30) + "Pl".ljust(4) + "W".ljust(4) + "D".ljust(4) + "L".ljust(4) + "GF".ljust(4) + "GA".ljust(4) + "GD".ljust(6) + "Pts" + "|")
     print("-----------------------------------------------------------------------")
-    for i in range(20):
-        print("| " +
-              str(i+1).ljust(4) +
-              club_names[i].string.ljust(30) +
-              games_played[i].string.ljust(4) +
-              games_won[i].string.ljust(4) +
-              games_drawn[i].string.ljust(4) +
-              games_lost[i].string.ljust(4) +
-              goals_for[i].string.ljust(4) +
-              goals_against[i].string.ljust(4) +
-              goals_diff[i].string.ljust(6) +
-              club_points[i].string.ljust(4) +
-              "|")
+    for i in range(last_standing):
+        if i == 0:
+            print("|" +
+                  colorama.Back.RED +
+                  colorama.Fore.BLACK +
+                  " " +
+                  str(i+1).ljust(4) +
+                  club_names[i].string.ljust(30) +
+                  games_played[i].string.ljust(4) +
+                  games_won[i].string.ljust(4) +
+                  games_drawn[i].string.ljust(4) +
+                  games_lost[i].string.ljust(4) +
+                  goals_for[i].string.ljust(4) +
+                  goals_against[i].string.ljust(4) +
+                  goals_diff[i].string.ljust(6) +
+                  club_points[i].string.ljust(4) +
+                  colorama.Back.RESET +
+                  colorama.Fore.RESET +
+                  "|")
+        elif i in range(1, 4):
+            print("|" +
+                  colorama.Back.GREEN +
+                  colorama.Fore.BLACK +
+                  " " +
+                  str(i + 1).ljust(4) +
+                  club_names[i].string.ljust(30) +
+                  games_played[i].string.ljust(4) +
+                  games_won[i].string.ljust(4) +
+                  games_drawn[i].string.ljust(4) +
+                  games_lost[i].string.ljust(4) +
+                  goals_for[i].string.ljust(4) +
+                  goals_against[i].string.ljust(4) +
+                  goals_diff[i].string.ljust(6) +
+                  club_points[i].string.ljust(4) +
+                  colorama.Back.RESET +
+                  colorama.Fore.RESET +
+                  "|")
+        elif i in range(4, 6):
+            print("|" +
+                  colorama.Back.BLUE +
+                  colorama.Fore.BLACK +
+                  " " +
+                  str(i + 1).ljust(4) +
+                  club_names[i].string.ljust(30) +
+                  games_played[i].string.ljust(4) +
+                  games_won[i].string.ljust(4) +
+                  games_drawn[i].string.ljust(4) +
+                  games_lost[i].string.ljust(4) +
+                  goals_for[i].string.ljust(4) +
+                  goals_against[i].string.ljust(4) +
+                  goals_diff[i].string.ljust(6) +
+                  club_points[i].string.ljust(4) +
+                  colorama.Back.RESET +
+                  colorama.Fore.RESET +
+                  "|")
+        else:
+            print("| " +
+                  str(i + 1).ljust(4) +
+                  club_names[i].string.ljust(30) +
+                  games_played[i].string.ljust(4) +
+                  games_won[i].string.ljust(4) +
+                  games_drawn[i].string.ljust(4) +
+                  games_lost[i].string.ljust(4) +
+                  goals_for[i].string.ljust(4) +
+                  goals_against[i].string.ljust(4) +
+                  goals_diff[i].string.ljust(6) +
+                  club_points[i].string.ljust(4) +
+                  "|")
     print("-----------------------------------------------------------------------")
 
-def function_epl_clubs():
+def function_epl_ucl():
+    district_name = sys.argv[3]
+
+    pl = requests.get(pl_url, headers=headers, timeout=3)
+    pl.encoding = 'utf-8'
+    # print(pl.content)
+    pl_bs = BeautifulSoup(pl.content, "html.parser")
+    # print(pl_bs.prettify())
+    club_names = pl_bs.find_all("span", class_="widget-match-standings__team--full-name")
+    games_played = pl_bs.find_all("td", class_="widget-match-standings__matches-played")
+    games_won = pl_bs.find_all("td", class_="widget-match-standings__matches-won")
+    games_drawn = pl_bs.find_all("td", class_="widget-match-standings__matches-drawn")
+    games_lost = pl_bs.find_all("td", class_="widget-match-standings__matches-lost")
+    goals_for = pl_bs.find_all("td", class_="widget-match-standings__goals-for")
+    goals_against = pl_bs.find_all("td", class_="widget-match-standings__goals-against")
+    goals_diff = pl_bs.find_all("td", class_="widget-match-standings__goals-diff")
+    club_points = pl_bs.find_all("td", class_="widget-match-standings__pts")
+
+    if district_name in ('champion', 'champ', 'cp'):
+        function_epl_standings(1)
+    elif district_name in ('ucl', 'UCL', 'champions_league'):
+        function_epl_standings(4)
+    elif district_name in ('uel', 'UEL', 'europa', 'europa_league'):
+        print("-----------------------------------------------------------------------")
+        # print("|" + colorama.Back.WHITE + colorama.Fore.BLACK + " Pos".ljust(6) + "Clubs".ljust(30) + "Pl".ljust(4) + "W".ljust(4) + "D".ljust(4) + "L".ljust(4) + "GF".ljust(4) + "GA".ljust(4) + "GD".ljust(6) + "Pts" + colorama.Fore.RESET + colorama.Back.RESET + "|")
+        print("|" + " Pos".ljust(6) + "Clubs".ljust(30) + "Pl".ljust(4) + "W".ljust(4) + "D".ljust(4) + "L".ljust(
+            4) + "GF".ljust(4) + "GA".ljust(4) + "GD".ljust(6) + "Pts" + "|")
+        print("-----------------------------------------------------------------------")
+        for i in range(4, 6):
+            print("|" +
+                  colorama.Back.BLUE +
+                  colorama.Fore.BLACK +
+                  " " +
+                  str(i + 1).ljust(4) +
+                  club_names[i].string.ljust(30) +
+                  games_played[i].string.ljust(4) +
+                  games_won[i].string.ljust(4) +
+                  games_drawn[i].string.ljust(4) +
+                  games_lost[i].string.ljust(4) +
+                  goals_for[i].string.ljust(4) +
+                  goals_against[i].string.ljust(4) +
+                  goals_diff[i].string.ljust(6) +
+                  club_points[i].string.ljust(4) +
+                  colorama.Back.RESET +
+                  colorama.Fore.RESET +
+                  "|")
+        print("-----------------------------------------------------------------------")
+
+def function_clubs():
     club_name = sys.argv[3]
     pl_cl = requests.get(pl_clubs_url[club_name], headers=headers, timeout=3)
     pl_cl.encoding = 'utf-8'
@@ -209,9 +312,12 @@ elif sys.argv[1] in ('dict', 'lookup', 'lu'):
 
 elif sys.argv[1] in ('football', 'fb'):
     if sys.argv[2] in ('epl_standing', 'epl'):
-        function_epl_standings()
+        if sys.argv[3] in ('champion', 'champ', 'cp', 'ucl', 'UCL', 'champions_league','uel', 'UEL',  'europa', 'europa_league'):
+            function_epl_ucl()
+        else:
+            function_epl_standings(20)
     elif sys.argv[2] in ('club_games', 'games', 'club', 'cg', 'cl'):
-        function_epl_clubs()
+        function_clubs()
 
 
 

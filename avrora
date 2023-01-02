@@ -1,0 +1,206 @@
+#!/usr/bin/env python
+
+import sys
+import os
+import xerox
+import datetime
+import time
+from time import strftime
+import requests
+from bs4 import BeautifulSoup
+
+home_dir = "/root/.avrora/"
+wp_path = home_dir + "avrora_waypoint.txt"
+wp_path_ = home_dir + "_avrora_waypoint.txt"
+nt_path = home_dir + "avrora_note.txt"
+#pl_url = "https://www.goal.com/en-us/%E8%8B%B1%E8%B6%85/%E7%A7%AF%E5%88%86%E6%A6%9C/2kwbbcootiqqgmrzs6o5inle5"
+pl_url = "https://www.goal.com/en/premier-league/table/2kwbbcootiqqgmrzs6o5inle5"
+user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
+headers={'User-Agent':user_agent}
+pl_clubs_url = {
+    "arsenal": "https://www.goal.com/en/team/arsenal/fixtures-results/4dsgumo7d4zupm2ugsvm4zm4d",
+    "manchester-city": "https://www.goal.com/en/team/manchester-city/fixtures-results/a3nyxabgsqlnqfkeg41m6tnpp",
+    "newcastle-united": "https://www.goal.com/en/team/newcastle-united/fixtures-results/7vn2i2kd35zuetw6b38gw9jsz",
+    "manchester-united": "https://www.goal.com/en/team/manchester-united/fixtures-results/6eqit8ye8aomdsrrq0hk3v7gh",
+    "tottenham-hotspur": "https://www.goal.com/en/team/tottenham-hotspur/fixtures-results/22doj4sgsocqpxw45h607udje",
+    "liverpool": "https://www.goal.com/en/team/liverpool/fixtures-results/c8h9bw1l82s06h77xxrelzhur",
+    "fulham": "https://www.goal.com/en/team/fulham/fixtures-results/hzqh7z0mdl3v7gwete66syxp",
+    "chelsea": "https://www.goal.com/en/team/chelsea/fixtures-results/9q0arba2kbnywth8bkxlhgmdr",
+    "brighton-hove-albion": "https://www.goal.com/en/team/brighton-hove-albion/fixtures-results/e5p0ehyguld7egzhiedpdnc3w",
+    "brentford": "https://www.goal.com/en/team/brentford/fixtures-results/7yx5dqhhphyvfisohikodajhv",
+    "crystal-palace": "https://www.goal.com/en/team/crystal-palace/fixtures-results/1c8m2ko0wxq1asfkuykurdr0y",
+    "aston-villa": "https://www.goal.com/en/team/aston-villa/fixtures-results/b496gs285it6bheuikox6z9mj",
+    "leicester-city": "https://www.goal.com/en/team/leicester-city/fixtures-results/avxknfz4f6ob0rv9dbnxdzde0",
+    "leeds-united": "https://www.goal.com/en/team/leeds-united/fixtures-results/48gk2hpqtsl6p9sx9kjhaydq4",
+    "bournemouth": "https://www.goal.com/en/team/bournemouth/fixtures-results/1pse9ta7a45pi2w2grjim70ge",
+    "everton": "https://www.goal.com/en/team/everton/fixtures-results/ehd2iemqmschhj2ec0vayztzz",
+    "west-ham-united": "https://www.goal.com/en/team/west-ham-united/fixtures-results/4txjdaqveermfryvbfrr4taf7",
+    "nottinham-forest": "https://www.goal.com/en/team/nottingham-forest/fixtures-results/1qtaiy11gswx327s0vkibf70n",
+    "wolves": "https://www.goal.com/en/team/wolverhampton-wanderers/fixtures-results/b9si1jn1lfxfund69e9ogcu2n",
+    "southampton": "https://www.goal.com/en/team/southampton/fixtures-results/d5ydtvt96bv7fq04yqm2w2632"
+}
+
+
+def help_info():
+    print('''
+    Help Info:
+    The file should be at /usr/bin/avrora.py
+    Be a geek
+    Look into the code yourself!
+    ''')
+
+def version_info():
+    print("Avrora, your personal CLI assistant, now at 0.0.1")
+
+def function_waypoint():
+    if sys.argv[2] in ('add', 'a') :
+        working_dir = os.getcwd()
+        waypoint_name = sys.argv[3]
+        with open(wp_path, 'a+') as wp_file:
+            wp_file.write(waypoint_name + " " + working_dir + '\n')
+            wp_file.close()
+        exit()
+    if sys.argv[2] in ('goto','gt'):
+        waypoint_name = sys.argv[3]
+        with open(wp_path, 'r+') as wp_file:
+            while True:
+                line = wp_file.readline()
+                content = line.split()
+                #print(content)
+                if content[0] == waypoint_name:
+                    cmd = 'cd ' + content[1]
+                    xerox.copy(cmd)
+                    print("Command copied to clipboard")
+                    #os.system(cmd)
+                    #print(cmd)
+                    break
+            wp_file.close()
+    if sys.argv[2] in ('delete', 'del'):
+        waypoint_name = sys.argv[3]
+        with open(wp_path, "r") as input:
+            with open(wp_path_, "w") as output:
+                for line in input:
+                    if waypoint_name not in line.strip("\n"):
+                        output.write(line)
+                output.close()
+            input.close()
+        os.replace(wp_path_,wp_path)
+    if sys.argv[2] in ('list', 'ls'):
+        os.system("batcat " + wp_path)
+
+def function_note():
+    if sys.argv[2] in ('add', 'a') :
+        note_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        #note_time = time.ctime()
+        note_content = sys.argv[3]
+        with open(nt_path, 'a+') as nt_file:
+            nt_file.write(note_time + " " + note_content + '\n')
+            nt_file.close()
+        exit()
+    if sys.argv[2] in ('list', 'ls'):
+        os.system("batcat " + nt_path)
+    if sys.argv[2] in ('delete', 'del'):
+        with open(nt_path, 'r+') as nt_file:
+            nt_file.truncate(0)
+            nt_file.close()
+
+
+def function_rest():
+    rest_time = float(sys.argv[2])
+    time.sleep(rest_time)
+    os.system('''echo "time-is-over" | festival --tts''')
+    os.system('''echo "time-is-over" | festival --tts''')
+    os.system('''echo "time-is-over" | festival --tts''')
+    exit()
+
+def function_time():
+    now_time = datetime.datetime.now().strftime("Year %Y -- Month %m -- Day %d --- %H:%M:%S")
+    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    os.system('''echo "''' + now_time + '''" | festival --tts & ''')
+
+def function_lookup():
+    os.system("sdcv " + sys.argv[2])
+
+def function_epl_standings():
+    pl = requests.get(pl_url, headers=headers, timeout=3)
+    pl.encoding = 'utf-8'
+    #print(pl.content)
+    pl_bs = BeautifulSoup(pl.content, "html.parser")
+    #print(pl_bs.prettify())
+    club_names = pl_bs.find_all("span", class_="widget-match-standings__team--full-name")
+    games_played = pl_bs.find_all("td", class_="widget-match-standings__matches-played")
+    games_won = pl_bs.find_all("td", class_="widget-match-standings__matches-won")
+    games_drawn = pl_bs.find_all("td", class_="widget-match-standings__matches-drawn")
+    games_lost = pl_bs.find_all("td", class_="widget-match-standings__matches-lost")
+    goals_for = pl_bs.find_all("td", class_="widget-match-standings__goals-for")
+    goals_against = pl_bs.find_all("td", class_="widget-match-standings__goals-against")
+    goals_diff = pl_bs.find_all("td", class_="widget-match-standings__goals-diff")
+    club_points = pl_bs.find_all("td", class_="widget-match-standings__pts")
+    print("Pos".ljust(5) + "Clubs".ljust(30) + "Pl".ljust(4) + "W".ljust(4) + "D".ljust(4) + "L".ljust(4) + "GF".ljust(4) + "GA".ljust(4) + "GD".ljust(6) + "Pts")
+    print("--------------------------------------------------------------------")
+    for i in range(20):
+        print(str(i+1).ljust(4) +
+              club_names[i].string.ljust(30) +
+              games_played[i].string.ljust(4) +
+              games_won[i].string.ljust(4) +
+              games_drawn[i].string.ljust(4) +
+              games_lost[i].string.ljust(4) +
+              goals_for[i].string.ljust(4) +
+              goals_against[i].string.ljust(4) +
+              goals_diff[i].string.ljust(6) +
+              club_points[i].string)
+
+def function_epl_clubs():
+    club_name = sys.argv[3]
+    pl_cl = requests.get(pl_clubs_url[club_name], headers=headers, timeout=3)
+    pl_cl.encoding = 'utf-8'
+    pl_cl_bs = BeautifulSoup(pl_cl.content, "html.parser")
+    competition_names = pl_cl_bs.find_all("span", class_="match-additional-data__competition-name")
+    club_names = pl_cl_bs.find_all("span", class_="team-name")
+    goals = pl_cl_bs.find_all("span", class_="goals")
+    for i in range(1, 6):
+        print(competition_names[i-1].string.ljust(20) +
+              club_names[2*i-2].string.ljust(25) +
+              goals[2*i-2].string.ljust(2) +
+              "-".ljust(2) +
+              goals[2*i-1].string.ljust(5) +
+              club_names[2*i-1].string)
+    for i in range(6, 11):
+        print(competition_names[i-1].string.ljust(20) +
+              club_names[2*i-2].string.ljust(34) +
+              club_names[2*i-1].string)
+
+
+if len(sys.argv) <= 0:
+    print("add fucking sth")
+
+elif sys.argv[1] in ('-h', '--help'):
+    help_info()
+
+elif sys.argv[1] in ('-v', '--verison'):
+    version_info()
+
+elif sys.argv[1] in ('waypoint', 'wp'):
+    function_waypoint()
+
+elif sys.argv[1] in ('note', 'nt'):
+    function_note()
+
+elif sys.argv[1] in ('rest', 'rs'):
+    function_rest()
+
+elif sys.argv[1] == 'time':
+    function_time()
+
+elif sys.argv[1] in ('dict', 'lookup', 'lu'):
+    function_lookup()
+
+elif sys.argv[1] in ('football', 'fb'):
+    if sys.argv[2] in ('epl_standing', 'epl'):
+        function_epl_standings()
+    elif sys.argv[2] in ('club_games', 'games', 'club', 'cg', 'cl'):
+        function_epl_clubs()
+
+
+
+

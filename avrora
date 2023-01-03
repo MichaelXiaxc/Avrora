@@ -16,6 +16,7 @@ wp_path = home_dir + "avrora_waypoint.txt"
 wp_path_ = home_dir + "_avrora_waypoint.txt"
 nt_path = home_dir + "avrora_note.txt"
 pl_url = "https://www.goal.com/en/premier-league/table/2kwbbcootiqqgmrzs6o5inle5"
+pl_games_url = "https://www.goal.com/en/premier-league/fixtures-results/{}/2kwbbcootiqqgmrzs6o5inle5"
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
 headers={'User-Agent':user_agent}
 pl_clubs_url = {
@@ -301,6 +302,46 @@ def function_clubs():
               " │")
     print("└────────────────────────────────────────────────────────────────────────────────────┘")
 
+def function_epl_games(date):
+    '''date format: YYYY-MM-DD'''
+    pl_games_url_using = pl_games_url.format(date)
+    pl_g = requests.get(pl_games_url_using, headers=headers, timeout=3)
+    pl_g_bs = BeautifulSoup(pl_g.content, "html.parser")
+    club_names = pl_g_bs.find_all("span", class_="team-name")
+    goals = pl_g_bs.find_all("span", class_="goals")
+    game_status = pl_g_bs.find_all("div", class_ = "match-status")
+    game_states=[]
+    for state in game_status:
+        game_states.append(state.find("span"))
+    print("┌─────────────────────────────────────────────────────────────┐")
+    print("│ " + "Games on " + date.ljust(50) + " │")
+    print("├─────────────────────────────────────────────────────────────┤")
+    print("│ " + "Home".ljust(34) + "Away".ljust(25) + " │")
+    print("├─────────────────────────────────────────────────────────────┤")
+    #print(game_states)
+    for i in range(1, 11):
+        try:
+            if game_states[i-1].string == "FT":
+                print("│ " +
+                    club_names[2*i-2].string.ljust(25) +
+                    goals[2*i-2].string.ljust(2) +
+                    "-".ljust(2) +
+                    goals[2*i-1].string.ljust(5) +
+                    club_names[2*i-1].string.ljust(25) +
+                    " │")
+            else:
+                print("│ " +
+                      club_names[2 * i - 2].string.ljust(25) +
+                      " ".ljust(2) +
+                      "-".ljust(2) +
+                      " ".ljust(5) +
+                      club_names[2 * i - 1].string.ljust(25) +
+                       " │")
+        except IndexError:
+            print("└─────────────────────────────────────────────────────────────┘")
+            exit()
+
+
 
 if len(sys.argv) <= 0:
     print("add fucking sth")
@@ -333,8 +374,10 @@ elif sys.argv[1] in ('football', 'fb'):
                 function_epl_ucl()
         except IndexError:
             function_epl_standings(20)
-    elif sys.argv[2] in ('club_games', 'games', 'club', 'cg', 'cl'):
+    elif sys.argv[2] in ('club', 'cl'):
         function_clubs()
+    elif sys.argv[2] in ('games', 'gm'):
+        function_epl_games(sys.argv[3])
 
 elif sys.argv[1] in ('decorate', 'deco', 'dc'):
     function_decorate_string()
